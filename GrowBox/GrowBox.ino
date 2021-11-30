@@ -22,18 +22,27 @@ DallasTemperature sensors(&oneWire);                               //proslijeđi
 unsigned int moisture, light;
 int xm, x;
 float temp;
+int lightTimer = 0;
+int lightChecker = 0;
 
 
  void setup(void) {
   sensors.begin();
   u8g2.begin();
   pinMode(fan, OUTPUT);
+  digitalWrite(fan, HIGH);
   pinMode(heater, OUTPUT);
-  digitalWrite(heater, LOW);
+  digitalWrite(heater, HIGH);
   pinMode(Hfan, OUTPUT);
+  digitalWrite(Hfan, HIGH);
   pinMode(pump, OUTPUT);
+  digitalWrite(pump, HIGH);
   pinMode(led, OUTPUT);
+  digitalWrite(led, HIGH);
+  digitalWrite(heater, LOW);
 }
+
+
 
 //Glavni program
   void loop(void) {
@@ -43,10 +52,6 @@ float temp;
   checkLightning();
   delay(200);
 }
-
-
-
-
 
 //Funkcija za ispis vlage na ekran oled 128x32
 
@@ -97,9 +102,6 @@ void checkMoisture(){
 }
 
 
-
-
-
 //Funkcija za ispis temperature na ekran oled 128x32
 
 void checkTemperature(){
@@ -123,38 +125,24 @@ void checkTemperature(){
    int lastTimeOn;
    int firstTime = 0;
    int lastTimeOff;
-
-   if(digitalRead(heater) != 0){
-    if(temp > 23){
-      digitalWrite(heater, LOW);
-      lastTimeOff = sc;
-    }
-    else{
-      digitalWrite(heater, HIGH);
-    }
-   }
-
    
-  if(temp<20){
-   if (firstTime == 1){
-    if((sc - lastTimeOff) > 600){
+  if(temp<24){
       digitalWrite(heater, HIGH);
-      lastTimeOn = sc;
-    }
-    else{
+      digitalWrite(Hfan, LOW);
+      digitalWrite(fan, HIGH);
+  }
+  if(temp>24 && temp<32){
       digitalWrite(heater, LOW);
-    }
-   }
-   else{
-    digitalWrite(heater, HIGH);
-    firstTime = 1;
-   }
+      digitalWrite(Hfan, HIGH);
+      digitalWrite(fan, HIGH);
   }
 
   if(temp > 32){
-    digitalWrite(fan, HIGH);
+      digitalWrite(heater, LOW);
+      digitalWrite(fan, LOW);
+      digitalWrite(Hfan, HIGH);
   }
-  
+  delay(1000);
 }
 
 //Funkcija za ispis osvjetljenja na ekran oled 128x32
@@ -183,17 +171,13 @@ void checkLightning(){
    u8g2.drawStr(101,24,"%");
    u8g2.sendBuffer();
   }
-   
-  digitalWrite(PB9, HIGH);
-  delay(2000);
-   if(x<50){
-    digitalWrite(PB9, LOW);
-    delay(3000);
+
+  if(x<50){
+    digitalWrite(led, HIGH);
   }
-  else{
-    digitalWrite(PB9, HIGH);
-  }
-    delay(500);
+  else
+  digitalWrite(led,LOW);
+  
 }
 
 
